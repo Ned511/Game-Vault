@@ -1,5 +1,5 @@
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 .vault-root, .vault-root * { box-sizing: border-box; }
 
@@ -12,8 +12,10 @@
   --text: #e8eaed;
   --text-dim: #8b93a5;
   --text-faint: #565d6d;
-  --accent: #4da3ff;
-  --accent-dim: #2c5f94;
+  --accent: #ff8a3d;
+  --accent-2: #ec1a68;
+  --accent-dim: #7a3a2e;
+  --accent-grad: linear-gradient(90deg, #ff8a3d, #ec1a68);
   --available: #3ecf8e;
   --available-dim: #1d4a37;
   --sold: #ff6b6b;
@@ -38,7 +40,7 @@
 
 /* Header */
 .vault-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.vault-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 25px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.vault-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 25px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
 .vault-title .dot3 { display: inline-flex; gap: 3px; }
 .vault-title .dot3 span { width: 7px; height: 7px; border-radius: 2px; display: inline-block; }
 .vault-title .dot3 span:nth-child(1) { background: var(--ps5); }
@@ -50,8 +52,8 @@
 .btn { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
 .btn:hover { border-color: var(--accent-dim); background: var(--surface-3); }
 .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #08101c; font-weight: 600; }
-.btn-primary:hover { background: #6bb4ff; border-color: #6bb4ff; }
+.btn-primary { background: var(--accent-grad); border-color: transparent; color: #fff; font-weight: 700; }
+.btn-primary:hover { filter: brightness(1.1); }
 .btn-danger { color: var(--sold); }
 .btn-danger:hover { border-color: var(--sold); }
 .btn-sm { padding: 5px 9px; font-size: 12px; }
@@ -61,7 +63,7 @@
 
 /* Tabs */
 .tab-nav { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
-.tab-btn { background: transparent; border: none; color: var(--text-dim); padding: 10px 4px; margin-right: 18px; font-size: 14px; font-weight: 600; font-family: 'Space Grotesk', sans-serif; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab-btn { background: transparent; border: none; color: var(--text-dim); padding: 10px 4px; margin-right: 18px; font-size: 14px; font-weight: 600; font-family: 'Rajdhani', sans-serif; cursor: pointer; border-bottom: 2px solid transparent; }
 .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 
 .view { display: none; }
@@ -70,7 +72,7 @@
 /* Stats */
 .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 18px; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; }
-.stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+.stat-val { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; }
 .stat-label { color: var(--text-dim); font-size: 11.5px; margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
 .stat-card.avail .stat-val { color: var(--available); }
 .stat-card.sold .stat-val { color: var(--sold); }
@@ -94,7 +96,7 @@
 .panel-actions { display: flex; gap: 8px; margin-top: 4px; }
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); border: 1px dashed var(--border); border-radius: 12px; }
-.empty-state .big { font-family: 'Space Grotesk', sans-serif; font-size: 17px; color: var(--text); margin-bottom: 6px; }
+.empty-state .big { font-family: 'Rajdhani', sans-serif; font-size: 17px; color: var(--text); margin-bottom: 6px; }
 
 /* Account list */
 .acc-list { display: flex; flex-direction: column; gap: 8px; }
@@ -185,7 +187,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
 .lock-box .dot3 span:nth-child(1) { background: var(--ps5); }
 .lock-box .dot3 span:nth-child(2) { background: var(--ps4); }
 .lock-box .dot3 span:nth-child(3) { background: var(--sec); }
-.lock-box h2 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 6px; }
+.lock-box h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; margin: 0 0 6px; }
 .lock-box p { color: var(--text-dim); font-size: 13px; margin: 0 0 18px; }
 .lock-box input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 8px; font-size: 15px; text-align: center; margin-bottom: 10px; font-family: inherit; }
 .lock-box input:focus { outline: none; border-color: var(--accent-dim); }
@@ -201,7 +203,13 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
 <div class="vault-root">
   <div class="lock-screen" id="lockScreen">
     <div class="lock-box">
-      <div class="dot3"><span></span><span></span><span></span></div>
+      <div class="logo-mark" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:12px; background:#0e0c11; border:1px solid var(--accent-2); box-shadow:0 0 16px rgba(236,26,104,0.35); margin:0 auto 12px;">
+        <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L21 9L12 22L3 9L12 2Z" stroke="url(#gvGradLock)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M3 9H21M9 9L12 22M15 9L12 22M12 2L8.5 9M12 2L15.5 9" stroke="url(#gvGradLock)" stroke-width="0.8" opacity="0.6"/>
+          <defs><linearGradient id="gvGradLock" x1="3" y1="2" x2="21" y2="22"><stop stop-color="#ff8a3d"/><stop offset="1" stop-color="#ec1a68"/></linearGradient></defs>
+        </svg>
+      </div>
       <h2>Game Vault</h2>
       <p>Enter the owner password to continue</p>
       <input type="password" id="lockPassword" placeholder="Password" autofocus>
@@ -214,8 +222,14 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     <div class="vault-header">
       <div>
         <div class="vault-title">
-          <span class="dot3"><span></span><span></span><span></span></span>
-          Game Vault
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:9px; background:#0e0c11; border:1px solid var(--accent-2); box-shadow:0 0 10px rgba(236,26,104,0.35); flex-shrink:0;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L21 9L12 22L3 9L12 2Z" stroke="url(#gvGradHeader)" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M3 9H21M9 9L12 22M15 9L12 22M12 2L8.5 9M12 2L15.5 9" stroke="url(#gvGradHeader)" stroke-width="0.8" opacity="0.6"/>
+              <defs><linearGradient id="gvGradHeader" x1="3" y1="2" x2="21" y2="22"><stop stop-color="#ff8a3d"/><stop offset="1" stop-color="#ec1a68"/></linearGradient></defs>
+            </svg>
+          </span>
+          <span style="font-family:'Orbitron', sans-serif;">GAME VAULT</span>
         </div>
         <div class="vault-sub">Shared PlayStation accounts &amp; sales ledger</div>
       </div>
@@ -288,6 +302,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
             </select>
           </div>
           <div class="field"><label>Notes (optional)</label><input id="f_notes" placeholder="region, activation limit, etc."></div>
+          <div class="field"><label>Cover image URL (optional)</label><input id="f_image" placeholder="https://... — shown on the reseller page"></div>
         </div>
         <div class="form-grid" id="initialPriceGrid">
           <div class="field" id="priceFieldPs5"><label>PS5 Primary — asking price</label><input id="f_price_ps5" placeholder="e.g. 6"></div>
@@ -454,6 +469,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     if (!acc.purchaseOrderId) acc.purchaseOrderId = '';
     if (!acc.dob) acc.dob = '';
     if (!acc.platformMode) acc.platformMode = 'both';
+    if (acc.image === undefined) acc.image = '';
     const looksLegacy = !Array.isArray(acc.slots) || acc.slots.length === 0 || acc.slots.some(s => !s.type);
     if (looksLegacy){
       const old = Array.isArray(acc.slots) ? acc.slots : [];
@@ -541,6 +557,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
   function computeAvailabilitySnapshot(){
     return accounts.map(acc => ({
       games: acc.games || '',
+      image: acc.image || '',
       slots: acc.slots.map(s => ({
         type: s.type,
         label: slotDef(s.type).label,
@@ -690,6 +707,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     <div class="acc-card ${expanded ? 'expanded' : ''}">
       <div class="acc-row" data-id="${acc.id}">
         <span class="chevron">▶</span>
+        ${acc.image ? `<img src="${escapeHtml(acc.image)}" alt="" style="width:34px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0;" onerror="this.style.display='none'">` : ''}
         <div class="acc-main">
           <div class="acc-email">${escapeHtml(acc.email)}</div>
           <div class="acc-meta">
@@ -777,7 +795,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     clearAddForm();
   });
   function clearAddForm(){
-    ['f_email','f_password','f_username','f_poid','f_dob','f_games','f_notes','f_price_ps5','f_price_ps4','f_price_sec'].forEach(id => $('#'+id).value = '');
+    ['f_email','f_password','f_username','f_poid','f_dob','f_games','f_notes','f_image','f_price_ps5','f_price_ps4','f_price_sec'].forEach(id => $('#'+id).value = '');
     $('#f_platform_mode').value = 'both';
   }
 
@@ -795,6 +813,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     $('#f_dob').value = acc.dob || '';
     $('#f_games').value = acc.games || '';
     $('#f_notes').value = acc.notes || '';
+    $('#f_image').value = acc.image || '';
     $('#f_platform_mode').value = acc.platformMode || 'both';
     $('#addPanel').classList.add('open');
     $('#addPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -845,6 +864,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
       acc.dob = $('#f_dob').value;
       acc.games = $('#f_games').value.trim();
       acc.notes = $('#f_notes').value.trim();
+      acc.image = $('#f_image').value.trim();
       saveAccounts();
       editingAccountId = null;
       clearAddForm();
@@ -860,6 +880,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
       dob: $('#f_dob').value,
       games: $('#f_games').value.trim(),
       notes: $('#f_notes').value.trim(),
+      image: $('#f_image').value.trim(),
       platformMode: newMode,
       slots: newSlots({
         ps5_primary: $('#f_price_ps5').value.trim(),
