@@ -173,6 +173,25 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
 .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--surface-3); border: 1px solid var(--accent-dim); color: var(--text); padding: 9px 16px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
 
+/* Lock screen */
+.lock-screen {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.lock-box { max-width: 320px; width: 100%; text-align: center; }
+.lock-box .dot3 { display: inline-flex; gap: 4px; margin-bottom: 14px; }
+.lock-box .dot3 span { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+.lock-box .dot3 span:nth-child(1) { background: var(--ps5); }
+.lock-box .dot3 span:nth-child(2) { background: var(--ps4); }
+.lock-box .dot3 span:nth-child(3) { background: var(--sec); }
+.lock-box h2 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 6px; }
+.lock-box p { color: var(--text-dim); font-size: 13px; margin: 0 0 18px; }
+.lock-box input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 8px; font-size: 15px; text-align: center; margin-bottom: 10px; font-family: inherit; }
+.lock-box input:focus { outline: none; border-color: var(--accent-dim); }
+.lock-error { color: var(--sold); font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+.lock-hidden { display: none !important; }
+
 @media (max-width: 560px) {
   .acc-row { flex-wrap: wrap; }
   .slot-count { text-align: left; }
@@ -180,6 +199,17 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
 </style>
 
 <div class="vault-root">
+  <div class="lock-screen" id="lockScreen">
+    <div class="lock-box">
+      <div class="dot3"><span></span><span></span><span></span></div>
+      <h2>Game Vault</h2>
+      <p>Enter the owner password to continue</p>
+      <input type="password" id="lockPassword" placeholder="Password" autofocus>
+      <button class="btn btn-primary" id="lockSubmitBtn" style="width:100%;">Unlock</button>
+      <div class="lock-error" id="lockError"></div>
+    </div>
+  </div>
+  <div id="vaultContent" class="lock-hidden">
   <div class="vault-wrap">
     <div class="vault-header">
       <div>
@@ -190,6 +220,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
         <div class="vault-sub">Shared PlayStation accounts &amp; sales ledger</div>
       </div>
       <div class="vault-actions">
+        <button class="btn" id="lockNowBtn">🔒 Lock</button>
         <button class="btn" id="settingsBtn">⚙ Sync settings</button>
         <button class="btn" id="exportBtn">Export backup</button>
         <button class="btn" id="importBtn">Import</button>
@@ -238,6 +269,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
       </div>
 
       <div class="panel" id="addPanel">
+        <div id="addPanelTitle" style="font-weight:600; margin-bottom:10px;">Add account</div>
         <div class="form-grid">
           <div class="field"><label>Email / login</label><input id="f_email" placeholder="account@mail.com"></div>
           <div class="field"><label>Password</label><input id="f_password" placeholder="password"></div>
@@ -249,7 +281,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
           <div class="field"><label>Games on this account</label><input id="f_games" placeholder="EA FC 26, GTA V, God of War Ragnarok"></div>
           <div class="field"><label>Notes (optional)</label><input id="f_notes" placeholder="region, activation limit, etc."></div>
         </div>
-        <div class="form-grid">
+        <div class="form-grid" id="initialPriceGrid">
           <div class="field"><label>PS5 Primary — asking price</label><input id="f_price_ps5" placeholder="e.g. 6"></div>
           <div class="field"><label>PS4 Primary — asking price</label><input id="f_price_ps4" placeholder="e.g. 5"></div>
           <div class="field"><label>Secondary — asking price</label><input id="f_price_sec" placeholder="e.g. 4"></div>
@@ -259,6 +291,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
           <button class="btn btn-ghost" id="cancelAddBtn">Cancel</button>
         </div>
       </div>
+
 
       <div id="listRoot"></div>
     </div>
@@ -312,6 +345,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     </div>
 
   </div>
+  </div>
   <div class="toast" id="toast"></div>
 </div>
 
@@ -319,9 +353,14 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
 (function(){
   const ACC_KEY = 'ps-accounts-v1';
   const INV_KEY = 'game-vault-invoices-v1';
+  const AVAIL_KEY = 'game-vault-availability-v1';
   const LS_URL_KEY = 'gv_apps_script_url';
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQincF57PnHfxM9IH0T45Z6R5abosmVpCmpWbYvPdB1hiUGGPoz9fwAYVBE13ZcaTbOA/exec';
 
-  function getScriptUrl(){ try { return localStorage.getItem(LS_URL_KEY) || ''; } catch(e){ return ''; } }
+  function getScriptUrl(){
+    try { const stored = localStorage.getItem(LS_URL_KEY); if (stored) return stored; } catch(e){}
+    return DEFAULT_SCRIPT_URL;
+  }
   function setScriptUrl(url){ try { localStorage.setItem(LS_URL_KEY, url); } catch(e){} }
   function hasSheetSync(){ return !!getScriptUrl(); }
   function hasClaudeStorage(){ return typeof window.storage !== 'undefined'; }
@@ -411,14 +450,19 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
 
   async function loadData(){
     if (hasSheetSync()){
+      let accLoadOk = false;
       try {
         const accRaw = await gsGet(ACC_KEY);
         accounts = Array.isArray(accRaw) ? accRaw.map(migrateAccount) : [];
+        accLoadOk = true;
       } catch(e){ accounts = []; showToast('Could not reach your Google Sheet'); }
       try {
         const invRaw = await gsGet(INV_KEY);
         invoices = Array.isArray(invRaw) ? invRaw : [];
       } catch(e){ invoices = []; }
+      if (accLoadOk){
+        try { await gsSet(AVAIL_KEY, computeAvailabilitySnapshot()); } catch(e){}
+      }
     } else if (hasClaudeStorage()){
       try {
         const res = await window.storage.get(ACC_KEY, false);
@@ -440,8 +484,12 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     clearTimeout(saveTimer1);
     saveTimer1 = setTimeout(async () => {
       try {
-        if (hasSheetSync()) await gsSet(ACC_KEY, accounts);
-        else if (hasClaudeStorage()) await window.storage.set(ACC_KEY, JSON.stringify(accounts), false);
+        if (hasSheetSync()){
+          await gsSet(ACC_KEY, accounts);
+          await gsSet(AVAIL_KEY, computeAvailabilitySnapshot());
+        } else if (hasClaudeStorage()){
+          await window.storage.set(ACC_KEY, JSON.stringify(accounts), false);
+        }
       } catch(e){ showToast('Save failed — check your connection'); }
     }, 150);
   }
@@ -453,6 +501,21 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
         else if (hasClaudeStorage()) await window.storage.set(INV_KEY, JSON.stringify(invoices), false);
       } catch(e){ showToast('Save failed — check your connection'); }
     }, 150);
+  }
+
+  // Only non-sensitive fields — this is what the reseller-facing page reads. Never add
+  // email, password, username, purchaseOrderId, dob, customer, or whatsapp to this.
+  function computeAvailabilitySnapshot(){
+    return accounts.map(acc => ({
+      games: acc.games || '',
+      slots: acc.slots.map(s => ({
+        type: s.type,
+        label: slotDef(s.type).label,
+        console: s.consoleUsed || slotDef(s.type).fixedConsole || 'PS4/PS5',
+        status: s.status,
+        price: s.status === 'available' ? (s.price || '') : ''
+      }))
+    }));
   }
 
   function updateSyncStatusLine(){
@@ -555,6 +618,12 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     $$('.copy-btn', root).forEach(btn => {
       btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard.writeText(btn.dataset.val).then(()=> showToast('Copied')); });
     });
+    $$('.edit-acc-btn', root).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditAccount(btn.dataset.id);
+      });
+    });
     $$('.delete-acc-btn', root).forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -608,7 +677,10 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
         </div>
         <div class="slots-grid">${acc.slots.map(s => renderSlot(acc, s)).join('')}</div>
         ${acc.notes ? `<div class="notes-box">Note: ${escapeHtml(acc.notes)}</div>` : ''}
-        <div class="acc-footer-actions"><button class="btn btn-sm btn-danger delete-acc-btn" data-id="${acc.id}">Delete account</button></div>
+        <div class="acc-footer-actions">
+          <button class="btn btn-sm btn-ghost edit-acc-btn" data-id="${acc.id}">Edit account</button>
+          <button class="btn btn-sm btn-danger delete-acc-btn" data-id="${acc.id}">Delete account</button>
+        </div>
       </div>
     </div>`;
   }
@@ -637,16 +709,69 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     </div>`;
   }
 
-  /* ---------------- ADD ACCOUNT ---------------- */
-  $('#toggleAddBtn').addEventListener('click', () => { $('#addPanel').classList.add('open'); $('#f_email').focus(); });
-  $('#cancelAddBtn').addEventListener('click', () => { $('#addPanel').classList.remove('open'); clearAddForm(); });
+  /* ---------------- ADD / EDIT ACCOUNT ---------------- */
+  let editingAccountId = null;
+
+  $('#toggleAddBtn').addEventListener('click', () => {
+    editingAccountId = null;
+    $('#addPanelTitle').textContent = 'Add account';
+    $('#saveAddBtn').textContent = 'Save account';
+    $('#initialPriceGrid').style.display = 'grid';
+    clearAddForm();
+    $('#addPanel').classList.add('open');
+    $('#f_email').focus();
+  });
+  $('#cancelAddBtn').addEventListener('click', () => {
+    $('#addPanel').classList.remove('open');
+    editingAccountId = null;
+    clearAddForm();
+  });
   function clearAddForm(){
     ['f_email','f_password','f_username','f_poid','f_dob','f_games','f_notes','f_price_ps5','f_price_ps4','f_price_sec'].forEach(id => $('#'+id).value = '');
   }
+
+  function openEditAccount(accId){
+    const acc = accounts.find(a => a.id === accId);
+    if (!acc) return;
+    editingAccountId = accId;
+    $('#addPanelTitle').textContent = 'Edit account';
+    $('#saveAddBtn').textContent = 'Save changes';
+    $('#initialPriceGrid').style.display = 'none';
+    $('#f_email').value = acc.email;
+    $('#f_password').value = acc.password;
+    $('#f_username').value = acc.username || '';
+    $('#f_poid').value = acc.purchaseOrderId || '';
+    $('#f_dob').value = acc.dob || '';
+    $('#f_games').value = acc.games || '';
+    $('#f_notes').value = acc.notes || '';
+    $('#addPanel').classList.add('open');
+    $('#addPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#f_email').focus();
+  }
+
   $('#saveAddBtn').addEventListener('click', () => {
     const email = $('#f_email').value.trim();
     const password = $('#f_password').value.trim();
     if (!email || !password){ showToast('Email and password are required'); return; }
+
+    if (editingAccountId){
+      const acc = accounts.find(a => a.id === editingAccountId);
+      if (!acc){ showToast('Account no longer exists'); return; }
+      acc.email = email;
+      acc.password = password;
+      acc.username = $('#f_username').value.trim();
+      acc.purchaseOrderId = $('#f_poid').value.trim();
+      acc.dob = $('#f_dob').value;
+      acc.games = $('#f_games').value.trim();
+      acc.notes = $('#f_notes').value.trim();
+      saveAccounts();
+      editingAccountId = null;
+      clearAddForm();
+      $('#addPanel').classList.remove('open');
+      showToast('Account updated');
+      render();
+      return;
+    }
     const acc = {
       id: uid(), email, password,
       username: $('#f_username').value.trim(),
@@ -973,6 +1098,41 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     e.target.value = '';
   });
 
+  /* ---------------- OWNER LOCK ---------------- */
+  // Change this before sharing the file with your brother — this is the shared owner password.
+  const OWNER_PASSWORD = 'changeme123';
+  const LS_UNLOCK_KEY = 'gv_unlocked';
+
+  function tryUnlock(pw){
+    if (pw === OWNER_PASSWORD){
+      try { localStorage.setItem(LS_UNLOCK_KEY, '1'); } catch(e){}
+      $('#lockScreen').style.display = 'none';
+      $('#vaultContent').classList.remove('lock-hidden');
+      loadData();
+      return true;
+    }
+    $('#lockError').textContent = 'Wrong password';
+    return false;
+  }
+
+  $('#lockSubmitBtn').addEventListener('click', () => tryUnlock($('#lockPassword').value));
+  $('#lockPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock($('#lockPassword').value); });
+  $('#lockNowBtn').addEventListener('click', () => {
+    try { localStorage.removeItem(LS_UNLOCK_KEY); } catch(e){}
+    $('#lockPassword').value = '';
+    $('#lockError').textContent = '';
+    $('#lockScreen').style.display = 'flex';
+    $('#vaultContent').classList.add('lock-hidden');
+  });
+
+  let alreadyUnlocked = false;
+  try { alreadyUnlocked = localStorage.getItem(LS_UNLOCK_KEY) === '1'; } catch(e){}
+  if (alreadyUnlocked){
+    $('#lockScreen').style.display = 'none';
+    $('#vaultContent').classList.remove('lock-hidden');
+    loadData();
+  }
+
   /* ---------------- SETTINGS ---------------- */
   $('#settingsBtn').addEventListener('click', () => {
     $('#f_script_url').value = getScriptUrl();
@@ -988,7 +1148,5 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     await loadData();
     showToast(hasSheetSync() ? 'Connected to Google Sheet' : 'Could not connect');
   });
-
-  loadData();
 })();
 </script>
