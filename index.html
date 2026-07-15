@@ -389,7 +389,11 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
       <div class="stats-row">
         <div class="stat-card"><div class="stat-val" id="statResellers">0</div><div class="stat-label">Resellers</div></div>
         <div class="stat-card"><div class="stat-val" id="statPendingOrders">0</div><div class="stat-label">Pending orders</div></div>
+        <div class="stat-card"><div class="stat-val" id="statPendingBalReqs">0</div><div class="stat-label">Balance requests</div></div>
       </div>
+
+      <div style="font-weight:600; margin-bottom:10px;">Balance requests</div>
+      <div id="balanceRequestsRoot" style="margin-bottom:24px;"></div>
 
       <div style="font-weight:600; margin-bottom:10px;">Pending orders</div>
       <div id="pendingOrdersRoot" style="margin-bottom:24px;"></div>
@@ -410,6 +414,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
   const AVAIL_KEY = 'game-vault-availability-v1';
   const RESELLER_KEY = 'game-vault-resellers-v1';
   const ORDER_KEY = 'game-vault-orders-v1';
+  const BALREQ_KEY = 'game-vault-balance-requests-v1';
   const LS_URL_KEY = 'gv_apps_script_url';
   const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQincF57PnHfxM9IH0T45Z6R5abosmVpCmpWbYvPdB1hiUGGPoz9fwAYVBE13ZcaTbOA/exec';
 
@@ -447,6 +452,7 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
   let invoices = [];
   let resellers = [];
   let orders = [];
+  let balanceRequests = [];
   let filterMode = 'all';
   let searchTerm = '';
   let invSearchTerm = '';
@@ -555,6 +561,10 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
         const ordRaw = await gsGet(ORDER_KEY);
         orders = Array.isArray(ordRaw) ? ordRaw : [];
       } catch(e){ orders = []; }
+      try {
+        const brRaw = await gsGet(BALREQ_KEY);
+        balanceRequests = Array.isArray(brRaw) ? brRaw : [];
+      } catch(e){ balanceRequests = []; }
     } else if (hasClaudeStorage()){
       try {
         const res = await window.storage.get(ACC_KEY, false);
@@ -607,6 +617,14 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     clearTimeout(saveTimer4);
     saveTimer4 = setTimeout(async () => {
       try { if (hasSheetSync()) await gsSet(ORDER_KEY, orders); }
+      catch(e){ showToast('Save failed — check your connection'); }
+    }, 150);
+  }
+  let saveTimer5;
+  function saveBalanceRequests(){
+    clearTimeout(saveTimer5);
+    saveTimer5 = setTimeout(async () => {
+      try { if (hasSheetSync()) await gsSet(BALREQ_KEY, balanceRequests); }
       catch(e){ showToast('Save failed — check your connection'); }
     }, 150);
   }
@@ -1279,8 +1297,57 @@ table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px;
     $('#statResellers').textContent = resellers.length;
     const pending = orders.filter(o => o.status === 'pending');
     $('#statPendingOrders').textContent = pending.length;
+    const pendingBal = balanceRequests.filter(r => r.status === 'pending');
+    $('#statPendingBalReqs').textContent = pendingBal.length;
+    renderBalanceRequests(pendingBal);
     renderPendingOrders(pending);
     renderResellerList();
+  }
+
+  function renderBalanceRequests(pending){
+    const root = $('#balanceRequestsRoot');
+    if (pending.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">No balance requests</div><div>When a reseller submits a payment screenshot, it shows up here.</div></div>`;
+      return;
+    }
+    root.innerHTML = pending.map(r => `
+      <div class="order-fulfill-card">
+        <div class="order-fulfill-top">
+          <div>
+            <div class="order-fulfill-game">${escapeHtml(r.resellerName)} — ${escapeHtml(String(r.amount))}</div>
+            <div class="order-fulfill-meta">${escapeHtml(r.date)} · ${escapeHtml(r.resellerWhatsapp)}</div>
+            ${r.screenshotUrl ? `<a href="${escapeHtml(r.screenshotUrl)}" target="_blank"><img src="${escapeHtml(r.screenshotUrl)}" style="max-width:180px; border-radius:8px; margin-top:8px; display:block; border:1px solid var(--border);"></a>` : ''}
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-primary approve-bal-btn" data-id="${r.id}">Approve</button>
+            <button class="btn btn-sm btn-danger reject-bal-btn" data-id="${r.id}">Reject</button>
+          </div>
+        </div>
+      </div>`).join('');
+
+    $$('.approve-bal-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const req = balanceRequests.find(x => x.id === btn.dataset.id);
+        const r = resellers.find(x => x.id === req.resellerId);
+        if (!r){ showToast('Reseller not found'); return; }
+        r.balance = Math.round((r.balance + req.amount) * 100) / 100;
+        req.status = 'approved';
+        saveResellers();
+        saveBalanceRequests();
+        showToast('Balance approved and added');
+        renderResellersView();
+      });
+    });
+    $$('.reject-bal-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Reject this balance request?')) return;
+        const req = balanceRequests.find(x => x.id === btn.dataset.id);
+        req.status = 'rejected';
+        saveBalanceRequests();
+        showToast('Request rejected');
+        renderResellersView();
+      });
+    });
   }
 
   function renderResellerList(){
