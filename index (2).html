@@ -1,0 +1,1532 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+.vault-root, .vault-root * { box-sizing: border-box; }
+
+.vault-root {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1e222b;
+  --surface-3: #262b36;
+  --border: #2a2f3a;
+  --text: #e8eaed;
+  --text-dim: #8b93a5;
+  --text-faint: #565d6d;
+  --accent: #ff8a3d;
+  --accent-2: #ec1a68;
+  --accent-dim: #7a3a2e;
+  --accent-grad: linear-gradient(90deg, #ff8a3d, #ec1a68);
+  --available: #3ecf8e;
+  --available-dim: #1d4a37;
+  --sold: #ff6b6b;
+  --sold-dim: #522427;
+  --ps5: #7c9bff;
+  --ps5-dim: #26305c;
+  --ps4: #c98bff;
+  --ps4-dim: #3a2a58;
+  --sec: #f2b84b;
+  --sec-dim: #4a3a1c;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  padding: 26px 20px 80px;
+  border-radius: 12px;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+.vault-wrap { max-width: 1220px; margin: 0 auto; }
+
+/* Header */
+.vault-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.vault-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 25px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.vault-title .dot3 { display: inline-flex; gap: 3px; }
+.vault-title .dot3 span { width: 7px; height: 7px; border-radius: 2px; display: inline-block; }
+.vault-title .dot3 span:nth-child(1) { background: var(--ps5); }
+.vault-title .dot3 span:nth-child(2) { background: var(--ps4); }
+.vault-title .dot3 span:nth-child(3) { background: var(--sec); }
+.vault-sub { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+.vault-actions { display: flex; gap: 8px; }
+
+.btn { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: border-color .15s, background .15s; }
+.btn:hover { border-color: var(--accent-dim); background: var(--surface-3); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn-primary { background: var(--accent-grad); border-color: transparent; color: #fff; font-weight: 700; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-danger { color: var(--sold); }
+.btn-danger:hover { border-color: var(--sold); }
+.btn-sm { padding: 5px 9px; font-size: 12px; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--text-dim); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* Tabs */
+.tab-nav { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+.tab-btn { background: transparent; border: none; color: var(--text-dim); padding: 10px 4px; margin-right: 18px; font-size: 14px; font-weight: 600; font-family: 'Rajdhani', sans-serif; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; }
+.stat-val { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; }
+.stat-label { color: var(--text-dim); font-size: 11.5px; margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+.stat-card.avail .stat-val { color: var(--available); }
+.stat-card.sold .stat-val { color: var(--sold); }
+.stat-card.rev .stat-val { color: var(--accent); }
+
+/* Toolbar */
+.toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.search-input { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-family: inherit; }
+.search-input:focus { outline: none; border-color: var(--accent-dim); }
+.search-input::placeholder { color: var(--text-faint); }
+.chip { background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); padding: 8px 13px; border-radius: 20px; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.chip.active { background: var(--accent-dim); border-color: var(--accent); color: #d7ecff; }
+
+/* Panels / forms */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 18px; display: none; }
+.panel.open { display: block; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.field label { display: block; font-size: 11.5px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .03em; }
+.field input, .field select, .field textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 7px; font-size: 13.5px; font-family: inherit; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent-dim); }
+.panel-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); border: 1px dashed var(--border); border-radius: 12px; }
+.empty-state .big { font-family: 'Rajdhani', sans-serif; font-size: 17px; color: var(--text); margin-bottom: 6px; }
+
+/* Account list */
+.acc-list { display: flex; flex-direction: column; gap: 8px; }
+.acc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.acc-row { display: flex; align-items: center; gap: 14px; padding: 12px 15px; cursor: pointer; }
+.acc-row:hover { background: var(--surface-2); }
+.acc-main { flex: 1; min-width: 0; }
+.acc-email { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-meta { color: var(--text-dim); font-size: 12px; margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { background: var(--surface-3); padding: 1px 7px; border-radius: 5px; font-size: 11px; }
+.tag.ps5 { background: var(--ps5-dim); color: var(--ps5); }
+.tag.ps4 { background: var(--ps4-dim); color: var(--ps4); }
+.tag.sec { background: var(--sec-dim); color: var(--sec); }
+
+.slot-dots { display: flex; gap: 4px; }
+.slot-dot { width: 9px; height: 9px; border-radius: 3px; background: var(--available-dim); border: 1px solid var(--available); }
+.slot-dot.sold { background: var(--sold-dim); border-color: var(--sold); }
+.slot-count { font-size: 11.5px; color: var(--text-dim); min-width: 54px; text-align: right; }
+.chevron { color: var(--text-faint); transition: transform .15s; font-size: 12px; }
+.acc-card.expanded .chevron { transform: rotate(90deg); }
+
+.acc-detail { display: none; padding: 0 15px 15px; border-top: 1px solid var(--border); }
+.acc-card.expanded .acc-detail { display: block; padding-top: 13px; }
+
+.cred-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 8px; margin-bottom: 14px; }
+.cred-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 11px; }
+.cred-box .cred-label { color: var(--text-faint); font-size: 10px; text-transform: uppercase; letter-spacing: .03em; display:block; margin-bottom: 3px; }
+.cred-box .cred-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+
+.slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.slot-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 11px; }
+.slot-card.is-sold { border-color: var(--sold-dim); }
+.slot-card.is-avail { border-color: var(--available-dim); }
+.slot-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.slot-head .slot-name { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: .03em; }
+.status-pill { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; border: none; cursor: pointer; font-family: inherit; }
+.status-pill.avail { background: var(--available-dim); color: var(--available); }
+.status-pill.sold { background: var(--sold-dim); color: var(--sold); }
+.slot-card input, .slot-card select { width: 100%; background: var(--surface-3); border: 1px solid var(--border); color: var(--text); padding: 6px 8px; border-radius: 6px; font-size: 12.5px; margin-top: 6px; font-family: inherit; }
+.slot-card input::placeholder { color: var(--text-faint); }
+.slot-card .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.slot-price-label { font-size: 11px; color: var(--text-faint); margin-top: 6px; }
+
+/* Resellers */
+.reseller-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.reseller-name { font-weight: 600; font-size: 13.5px; }
+.reseller-meta { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+.reseller-balance { font-family: 'JetBrains Mono', monospace; color: var(--available); font-weight: 600; font-size: 14px; }
+.topup-row { display: flex; gap: 6px; align-items: center; }
+.topup-row input { width: 90px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 7px 9px; border-radius: 6px; font-size: 12.5px; font-family: inherit; }
+
+.order-fulfill-card { background: var(--surface); border: 1px solid var(--sec-dim); border-radius: 10px; padding: 13px 15px; margin-bottom: 10px; }
+.order-fulfill-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.order-fulfill-game { font-weight: 600; font-size: 14px; }
+.order-fulfill-meta { color: var(--text-dim); font-size: 12px; margin-top: 3px; }
+.fulfill-picker { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.fulfill-option { display: flex; justify-content: space-between; align-items: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; margin-bottom: 6px; font-size: 12.5px; }
+.fulfill-option .mono { color: var(--text-dim); }
+
+.notes-box { color: var(--text-dim); font-size: 12.5px; margin-top: 4px; }
+.acc-footer-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Invoice picker */
+.acc-picker-input { position: relative; }
+.acc-suggest { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; margin-top: 4px; max-height: 220px; overflow-y: auto; z-index: 10; }
+.acc-suggest-item { padding: 9px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--border); }
+.acc-suggest-item:last-child { border-bottom: none; }
+.acc-suggest-item:hover { background: var(--surface-2); }
+.acc-suggest-item .em { font-family: 'JetBrains Mono', monospace; }
+.acc-suggest-item .gm { color: var(--text-dim); font-size: 11.5px; }
+
+.selected-acc-chip { display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); border: 1px solid var(--accent-dim); border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 13px; }
+.selected-acc-chip .mono { color: var(--accent); }
+
+.slot-pick-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.slot-pick { border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim); padding: 8px 13px; border-radius: 8px; font-size: 12.5px; cursor: pointer; }
+.slot-pick.selected { border-color: var(--accent); background: var(--accent-dim); color: #d7ecff; }
+.slot-pick[disabled] { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+
+.trx-row { display: flex; gap: 6px; align-items: flex-end; }
+.trx-row .field { flex: 1; }
+
+/* Invoice table */
+.inv-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
+table.inv-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+table.inv-table th { text-align: left; padding: 10px 12px; color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+table.inv-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+table.inv-table tr:last-child td { border-bottom: none; }
+table.inv-table .trx { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+table.inv-table .em { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
+
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--surface-3); border: 1px solid var(--accent-dim); color: var(--text); padding: 9px 16px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+/* Lock screen */
+.lock-screen {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.lock-box { max-width: 320px; width: 100%; text-align: center; }
+.lock-box .dot3 { display: inline-flex; gap: 4px; margin-bottom: 14px; }
+.lock-box .dot3 span { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+.lock-box .dot3 span:nth-child(1) { background: var(--ps5); }
+.lock-box .dot3 span:nth-child(2) { background: var(--ps4); }
+.lock-box .dot3 span:nth-child(3) { background: var(--sec); }
+.lock-box h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; margin: 0 0 6px; }
+.lock-box p { color: var(--text-dim); font-size: 13px; margin: 0 0 18px; }
+.lock-box input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 8px; font-size: 15px; text-align: center; margin-bottom: 10px; font-family: inherit; }
+.lock-box input:focus { outline: none; border-color: var(--accent-dim); }
+.lock-error { color: var(--sold); font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+.lock-hidden { display: none !important; }
+
+@media (max-width: 560px) {
+  .acc-row { flex-wrap: wrap; }
+  .slot-count { text-align: left; }
+}
+</style>
+
+<div class="vault-root">
+  <div class="lock-screen" id="lockScreen">
+    <div class="lock-box">
+      <div class="logo-mark" style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:12px; background:#0e0c11; border:1px solid var(--accent-2); box-shadow:0 0 16px rgba(236,26,104,0.35); margin:0 auto 12px;">
+        <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L21 9L12 22L3 9L12 2Z" stroke="url(#gvGradLock)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M3 9H21M9 9L12 22M15 9L12 22M12 2L8.5 9M12 2L15.5 9" stroke="url(#gvGradLock)" stroke-width="0.8" opacity="0.6"/>
+          <defs><linearGradient id="gvGradLock" x1="3" y1="2" x2="21" y2="22"><stop stop-color="#ff8a3d"/><stop offset="1" stop-color="#ec1a68"/></linearGradient></defs>
+        </svg>
+      </div>
+      <h2>Game Vault</h2>
+      <p>Enter the owner password to continue</p>
+      <input type="password" id="lockPassword" placeholder="Password" autofocus>
+      <button class="btn btn-primary" id="lockSubmitBtn" style="width:100%;">Unlock</button>
+      <div class="lock-error" id="lockError"></div>
+    </div>
+  </div>
+  <div id="vaultContent" class="lock-hidden">
+  <div class="vault-wrap">
+    <div class="vault-header">
+      <div>
+        <div class="vault-title">
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:9px; background:#0e0c11; border:1px solid var(--accent-2); box-shadow:0 0 10px rgba(236,26,104,0.35); flex-shrink:0;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L21 9L12 22L3 9L12 2Z" stroke="url(#gvGradHeader)" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M3 9H21M9 9L12 22M15 9L12 22M12 2L8.5 9M12 2L15.5 9" stroke="url(#gvGradHeader)" stroke-width="0.8" opacity="0.6"/>
+              <defs><linearGradient id="gvGradHeader" x1="3" y1="2" x2="21" y2="22"><stop stop-color="#ff8a3d"/><stop offset="1" stop-color="#ec1a68"/></linearGradient></defs>
+            </svg>
+          </span>
+          <span style="font-family:'Orbitron', sans-serif;">GAME VAULT</span>
+        </div>
+        <div class="vault-sub">Shared PlayStation accounts &amp; sales ledger</div>
+      </div>
+      <div class="vault-actions">
+        <button class="btn" id="lockNowBtn">🔒 Lock</button>
+        <button class="btn" id="settingsBtn">⚙ Sync settings</button>
+        <button class="btn" id="exportBtn">Export backup</button>
+        <button class="btn" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept=".json" style="display:none">
+      </div>
+    </div>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="accounts">Accounts</button>
+      <button class="tab-btn" data-tab="ledger">Sales Ledger</button>
+      <button class="tab-btn" data-tab="resellers">Resellers</button>
+    </div>
+
+    <div class="panel" id="settingsPanel">
+      <div style="font-weight:600; margin-bottom:6px;">Google Sheet sync</div>
+      <div style="color:var(--text-dim); font-size:12.5px; margin-bottom:12px;">
+        Paste the Apps Script Web App URL here once per device/browser. After that this page reads and writes straight to your Google Sheet, so opening it on any device stays in sync.
+      </div>
+      <div class="form-grid">
+        <div class="field" style="grid-column: 1 / -1;">
+          <label>Apps Script Web App URL</label>
+          <input id="f_script_url" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+      </div>
+      <div class="panel-actions">
+        <button class="btn btn-primary" id="saveScriptUrlBtn">Save &amp; connect</button>
+        <button class="btn btn-ghost" id="closeSettingsBtn">Close</button>
+      </div>
+      <div id="syncStatusLine" style="margin-top:10px; font-size:12.5px; color:var(--text-dim);"></div>
+    </div>
+
+    <!-- ACCOUNTS VIEW -->
+    <div class="view active" id="view-accounts">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="statAccounts">0</div><div class="stat-label">Accounts</div></div>
+        <div class="stat-card"><div class="stat-val" id="statSlots">0</div><div class="stat-label">Total slots</div></div>
+        <div class="stat-card avail"><div class="stat-val" id="statAvail">0</div><div class="stat-label">Available</div></div>
+        <div class="stat-card sold"><div class="stat-val" id="statSold">0</div><div class="stat-label">Sold</div></div>
+      </div>
+
+      <div class="toolbar">
+        <input class="search-input" id="searchInput" placeholder="Search by email, game or customer...">
+        <div class="chip active" data-filter="all">All</div>
+        <div class="chip" data-filter="available">Has availability</div>
+        <div class="chip" data-filter="soldout">Fully sold</div>
+        <button class="btn btn-primary" id="toggleAddBtn">+ Add account</button>
+      </div>
+
+      <div class="panel" id="addPanel">
+        <div id="addPanelTitle" style="font-weight:600; margin-bottom:10px;">Add account</div>
+        <div class="form-grid">
+          <div class="field"><label>Email / login</label><input id="f_email" placeholder="account@mail.com"></div>
+          <div class="field"><label>Password</label><input id="f_password" placeholder="password"></div>
+          <div class="field"><label>Username / PSN ID</label><input id="f_username" placeholder="psn_username"></div>
+          <div class="field"><label>Purchase order ID</label><input id="f_poid" placeholder="order ref (your records)"></div>
+          <div class="field"><label>Date of birth</label><input id="f_dob" type="date"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Games on this account</label><input id="f_games" placeholder="EA FC 26, GTA V, God of War Ragnarok"></div>
+          <div class="field">
+            <label>Platform</label>
+            <select id="f_platform_mode">
+              <option value="both">PS4 &amp; PS5</option>
+              <option value="ps5_only">PS5 only</option>
+              <option value="ps4_only">PS4 only</option>
+            </select>
+          </div>
+          <div class="field"><label>Notes (optional)</label><input id="f_notes" placeholder="region, activation limit, etc."></div>
+          <div class="field"><label>Cover image URL (optional)</label><input id="f_image" placeholder="https://... — shown on the reseller page"></div>
+        </div>
+        <div class="form-grid" id="initialPriceGrid">
+          <div class="field" id="priceFieldPs5"><label>PS5 Primary — asking price</label><input id="f_price_ps5" placeholder="e.g. 6"></div>
+          <div class="field" id="priceFieldPs4"><label>PS4 Primary — asking price</label><input id="f_price_ps4" placeholder="e.g. 5"></div>
+          <div class="field"><label>Secondary — asking price</label><input id="f_price_sec" placeholder="e.g. 4"></div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn btn-primary" id="saveAddBtn">Save account</button>
+          <button class="btn btn-ghost" id="cancelAddBtn">Cancel</button>
+        </div>
+      </div>
+
+
+      <div id="listRoot"></div>
+    </div>
+
+    <!-- LEDGER VIEW -->
+    <div class="view" id="view-ledger">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="statInvoices">0</div><div class="stat-label">Invoices</div></div>
+        <div class="stat-card rev"><div class="stat-val" id="statRevenue">0</div><div class="stat-label">Total revenue</div></div>
+      </div>
+
+      <div class="toolbar">
+        <input class="search-input" id="invSearchInput" placeholder="Search by TRX ID, WhatsApp, game or email...">
+        <button class="btn btn-primary" id="toggleInvBtn">+ New invoice</button>
+      </div>
+
+      <div class="panel" id="invPanel">
+        <div id="exchangeBanner" style="display:none; background:var(--sec-dim); border:1px solid var(--sec); color:var(--sec); border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:12px;"></div>
+        <div class="field acc-picker-input" style="margin-bottom:12px;">
+          <label>Find account (email / game / username)</label>
+          <input id="inv_acc_search" placeholder="Start typing to search accounts...">
+          <div class="acc-suggest" id="accSuggest" style="display:none;"></div>
+        </div>
+        <div id="selectedAccWrap"></div>
+
+        <div id="slotPickWrap"></div>
+
+        <div class="form-grid" id="invFieldsWrap" style="display:none;">
+          <div class="field"><label>Game sold</label><input id="inv_game" placeholder="e.g. EA FC 26"></div>
+          <div class="field"><label>Price</label><input id="inv_price" placeholder="e.g. 6"></div>
+          <div class="field"><label>Customer name (optional)</label><input id="inv_customer" placeholder="customer name"></div>
+          <div class="field"><label>Customer WhatsApp</label><input id="inv_whatsapp" placeholder="e.g. +92 300 1234567"></div>
+          <div class="field" id="consoleUsedWrap" style="display:none;">
+            <label>Console used (secondary slot)</label>
+            <select id="inv_console"><option value="PS4">PS4</option><option value="PS5">PS5</option></select>
+          </div>
+          <div class="field"><label>Date</label><input id="inv_date" type="date"></div>
+        </div>
+        <div class="trx-row" id="trxRow" style="display:none; margin-bottom:12px;">
+          <div class="field"><label>Unique TRX ID</label><input id="inv_trx" class="mono"></div>
+          <button class="btn btn-sm" id="regenTrxBtn">Regenerate</button>
+        </div>
+
+        <div class="panel-actions">
+          <button class="btn btn-primary" id="saveInvBtn">Save invoice &amp; mark slot sold</button>
+          <button class="btn btn-ghost" id="cancelInvBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div id="invListRoot"></div>
+    </div>
+
+    <!-- RESELLERS VIEW -->
+    <div class="view" id="view-resellers">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="statResellers">0</div><div class="stat-label">Resellers</div></div>
+        <div class="stat-card"><div class="stat-val" id="statPendingOrders">0</div><div class="stat-label">Pending orders</div></div>
+        <div class="stat-card"><div class="stat-val" id="statPendingBalReqs">0</div><div class="stat-label">Balance requests</div></div>
+      </div>
+
+      <div style="font-weight:600; margin-bottom:10px;">Balance requests</div>
+      <div id="balanceRequestsRoot" style="margin-bottom:24px;"></div>
+
+      <div style="font-weight:600; margin-bottom:10px;">Pending orders</div>
+      <div id="pendingOrdersRoot" style="margin-bottom:24px;"></div>
+
+      <div style="font-weight:600; margin-bottom:10px;">Reseller balances</div>
+      <div id="resellerListRoot"></div>
+    </div>
+
+  </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  const ACC_KEY = 'ps-accounts-v1';
+  const INV_KEY = 'game-vault-invoices-v1';
+  const AVAIL_KEY = 'game-vault-availability-v1';
+  const RESELLER_KEY = 'game-vault-resellers-v1';
+  const ORDER_KEY = 'game-vault-orders-v1';
+  const BALREQ_KEY = 'game-vault-balance-requests-v1';
+  const LS_URL_KEY = 'gv_apps_script_url';
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQincF57PnHfxM9IH0T45Z6R5abosmVpCmpWbYvPdB1hiUGGPoz9fwAYVBE13ZcaTbOA/exec';
+
+  function getScriptUrl(){
+    try { const stored = localStorage.getItem(LS_URL_KEY); if (stored) return stored; } catch(e){}
+    return DEFAULT_SCRIPT_URL;
+  }
+  function setScriptUrl(url){ try { localStorage.setItem(LS_URL_KEY, url); } catch(e){} }
+  function hasSheetSync(){ return !!getScriptUrl(); }
+  function hasClaudeStorage(){ return typeof window.storage !== 'undefined'; }
+
+  async function gsGet(key){
+    const url = getScriptUrl();
+    const res = await fetch(url + '?key=' + encodeURIComponent(key), { method: 'GET' });
+    const text = await res.text();
+    if (!text || text === 'null') return null;
+    return JSON.parse(text);
+  }
+  async function gsSet(key, value){
+    const url = getScriptUrl();
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ key, value })
+    });
+  }
+
+  const SLOT_DEFS = [
+    { key: 'ps5_primary', label: 'PS5 Primary', tagClass: 'ps5', fixedConsole: 'PS5' },
+    { key: 'ps4_primary', label: 'PS4 Primary', tagClass: 'ps4', fixedConsole: 'PS4' },
+    { key: 'secondary',   label: 'Secondary',   tagClass: 'sec', fixedConsole: '' }
+  ];
+
+  let accounts = [];
+  let invoices = [];
+  let resellers = [];
+  let orders = [];
+  let balanceRequests = [];
+  let filterMode = 'all';
+  let searchTerm = '';
+  let invSearchTerm = '';
+  let expandedId = null;
+  let activeTab = 'accounts';
+
+  // invoice form state
+  let invSelectedAccountId = null;
+  let invSelectedSlotType = null;
+  let exchangeSource = null; // { type:'invoice', invoiceId } or { type:'slot', accountId, slotType }
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  function uid(){ return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function genTrx(){ return 'GV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase(); }
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function escapeHtml(str){ return (str||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function showToast(msg){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._h);
+    showToast._h = setTimeout(()=> t.classList.remove('show'), 1900);
+  }
+
+  function slotTypesForMode(mode){
+    if (mode === 'ps5_only') return ['ps5_primary', 'secondary'];
+    if (mode === 'ps4_only') return ['ps4_primary', 'secondary'];
+    return ['ps5_primary', 'ps4_primary', 'secondary'];
+  }
+  function secondaryConsoleForMode(mode){
+    if (mode === 'ps5_only') return 'PS5';
+    if (mode === 'ps4_only') return 'PS4';
+    return '';
+  }
+
+  function newSlots(prices, mode){
+    prices = prices || {};
+    mode = mode || 'both';
+    return slotTypesForMode(mode).map(type => {
+      const d = slotDef(type);
+      return {
+        type, status: 'available',
+        price: prices[type] || '',
+        customer: '', whatsapp: '', trxId: '',
+        consoleUsed: type === 'secondary' ? secondaryConsoleForMode(mode) : (d.fixedConsole || '')
+      };
+    });
+  }
+
+  function migrateAccount(acc){
+    if (acc.email === undefined || acc.email === null) acc.email = '';
+    if (acc.password === undefined || acc.password === null) acc.password = '';
+    if (!acc.username) acc.username = '';
+    if (!acc.purchaseOrderId) acc.purchaseOrderId = '';
+    if (!acc.dob) acc.dob = '';
+    if (!acc.platformMode) acc.platformMode = 'both';
+    if (acc.image === undefined) acc.image = '';
+    const looksLegacy = !Array.isArray(acc.slots) || acc.slots.length === 0 || acc.slots.some(s => !s.type);
+    if (looksLegacy){
+      const old = Array.isArray(acc.slots) ? acc.slots : [];
+      acc.slots = SLOT_DEFS.map((d, i) => {
+        const o = old[i] || {};
+        return {
+          type: d.key,
+          status: o.status || 'available',
+          price: o.price || '',
+          customer: o.customer || '',
+          whatsapp: o.whatsapp || o.contact || '',
+          trxId: o.trxId || '',
+          consoleUsed: d.fixedConsole || (o.consoleUsed || '')
+        };
+      });
+      acc.platformMode = 'both';
+    } else {
+      acc.slots.forEach(s => {
+        if (s.customer === undefined) s.customer = '';
+        if (s.whatsapp === undefined) s.whatsapp = '';
+        if (s.trxId === undefined) s.trxId = '';
+        if (s.consoleUsed === undefined) s.consoleUsed = '';
+      });
+    }
+    return acc;
+  }
+
+  async function loadData(){
+    if (hasSheetSync()){
+      let accLoadOk = false;
+      try {
+        const accRaw = await gsGet(ACC_KEY);
+        accounts = Array.isArray(accRaw) ? accRaw.map(migrateAccount) : [];
+        accLoadOk = true;
+      } catch(e){ accounts = []; showToast('Could not reach your Google Sheet'); }
+      try {
+        const invRaw = await gsGet(INV_KEY);
+        invoices = Array.isArray(invRaw) ? invRaw : [];
+      } catch(e){ invoices = []; }
+      if (accLoadOk){
+        try { await gsSet(AVAIL_KEY, computeAvailabilitySnapshot()); } catch(e){}
+      }
+      try {
+        const resRaw = await gsGet(RESELLER_KEY);
+        resellers = Array.isArray(resRaw) ? resRaw : [];
+      } catch(e){ resellers = []; }
+      try {
+        const ordRaw = await gsGet(ORDER_KEY);
+        orders = Array.isArray(ordRaw) ? ordRaw : [];
+      } catch(e){ orders = []; }
+      try {
+        const brRaw = await gsGet(BALREQ_KEY);
+        balanceRequests = Array.isArray(brRaw) ? brRaw : [];
+      } catch(e){ balanceRequests = []; }
+    } else if (hasClaudeStorage()){
+      try {
+        const res = await window.storage.get(ACC_KEY, false);
+        accounts = res && res.value ? JSON.parse(res.value).map(migrateAccount) : [];
+      } catch(e){ accounts = []; }
+      try {
+        const res2 = await window.storage.get(INV_KEY, false);
+        invoices = res2 && res2.value ? JSON.parse(res2.value) : [];
+      } catch(e){ invoices = []; }
+    } else {
+      accounts = []; invoices = [];
+    }
+    updateSyncStatusLine();
+    window.gvDebug = { accounts, invoices, resellers, orders };
+    render();
+  }
+
+  let saveTimer1, saveTimer2;
+  function saveAccounts(){
+    clearTimeout(saveTimer1);
+    saveTimer1 = setTimeout(async () => {
+      try {
+        if (hasSheetSync()){
+          await gsSet(ACC_KEY, accounts);
+          await gsSet(AVAIL_KEY, computeAvailabilitySnapshot());
+        } else if (hasClaudeStorage()){
+          await window.storage.set(ACC_KEY, JSON.stringify(accounts), false);
+        }
+      } catch(e){ showToast('Save failed — check your connection'); }
+    }, 150);
+  }
+  function saveInvoices(){
+    clearTimeout(saveTimer2);
+    saveTimer2 = setTimeout(async () => {
+      try {
+        if (hasSheetSync()) await gsSet(INV_KEY, invoices);
+        else if (hasClaudeStorage()) await window.storage.set(INV_KEY, JSON.stringify(invoices), false);
+      } catch(e){ showToast('Save failed — check your connection'); }
+    }, 150);
+  }
+
+  let saveTimer3, saveTimer4;
+  function saveResellers(){
+    clearTimeout(saveTimer3);
+    saveTimer3 = setTimeout(async () => {
+      try { if (hasSheetSync()) await gsSet(RESELLER_KEY, resellers); }
+      catch(e){ showToast('Save failed — check your connection'); }
+    }, 150);
+  }
+  function saveOrders(){
+    clearTimeout(saveTimer4);
+    saveTimer4 = setTimeout(async () => {
+      try { if (hasSheetSync()) await gsSet(ORDER_KEY, orders); }
+      catch(e){ showToast('Save failed — check your connection'); }
+    }, 150);
+  }
+  let saveTimer5;
+  function saveBalanceRequests(){
+    clearTimeout(saveTimer5);
+    saveTimer5 = setTimeout(async () => {
+      try { if (hasSheetSync()) await gsSet(BALREQ_KEY, balanceRequests); }
+      catch(e){ showToast('Save failed — check your connection'); }
+    }, 150);
+  }
+
+  // Only non-sensitive fields — this is what the reseller-facing page reads. Never add
+  // email, password, username, purchaseOrderId, dob, customer, or whatsapp to this.
+  function computeAvailabilitySnapshot(){
+    return accounts.map(acc => ({
+      games: acc.games || '',
+      image: acc.image || '',
+      slots: acc.slots.map(s => ({
+        type: s.type,
+        label: slotDef(s.type).label,
+        console: s.consoleUsed || slotDef(s.type).fixedConsole || 'PS4/PS5',
+        status: s.status,
+        price: s.status === 'available' ? (s.price || '') : ''
+      }))
+    }));
+  }
+
+  function updateSyncStatusLine(){
+    const line = $('#syncStatusLine');
+    if (!line) return;
+    line.textContent = hasSheetSync()
+      ? 'Connected — data is syncing to your Google Sheet.'
+      : (hasClaudeStorage() ? 'Not connected to a Sheet yet — currently saving through Claude only.' : 'Not connected — add your Apps Script URL above to save data.');
+  }
+
+  function slotDef(type){ return SLOT_DEFS.find(d => d.key === type); }
+
+  /* ---------------- TABS ---------------- */
+  $$('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      $$('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      $('#view-accounts').classList.toggle('active', activeTab === 'accounts');
+      $('#view-ledger').classList.toggle('active', activeTab === 'ledger');
+      $('#view-resellers').classList.toggle('active', activeTab === 'resellers');
+      if (activeTab === 'resellers'){ try { renderResellersView(); } catch(e){ console.error('renderResellersView failed', e); } }
+    });
+  });
+
+  /* ---------------- ACCOUNTS RENDER ---------------- */
+  function computeStats(){
+    let slots = 0, avail = 0, sold = 0;
+    accounts.forEach(acc => acc.slots.forEach(s => { slots++; if (s.status === 'sold') sold++; else avail++; }));
+    $('#statAccounts').textContent = accounts.length;
+    $('#statSlots').textContent = slots;
+    $('#statAvail').textContent = avail;
+    $('#statSold').textContent = sold;
+
+    $('#statInvoices').textContent = invoices.length;
+    const revenue = invoices.filter(inv => inv.status !== 'exchanged').reduce((sum, inv) => sum + (parseFloat(inv.price) || 0), 0);
+    $('#statRevenue').textContent = revenue % 1 === 0 ? revenue : revenue.toFixed(2);
+  }
+
+  function matchesFilter(acc){
+    const availCount = acc.slots.filter(s => s.status !== 'sold').length;
+    if (filterMode === 'available') return availCount > 0;
+    if (filterMode === 'soldout') return availCount === 0;
+    return true;
+  }
+  function matchesSearch(acc){
+    if (!searchTerm) return true;
+    const t = searchTerm.toLowerCase();
+    if (acc.email.toLowerCase().includes(t)) return true;
+    if ((acc.username||'').toLowerCase().includes(t)) return true;
+    if ((acc.games||'').toLowerCase().includes(t)) return true;
+    if (acc.slots.some(s => (s.customer||'').toLowerCase().includes(t) || (s.whatsapp||'').toLowerCase().includes(t))) return true;
+    return false;
+  }
+
+  function render(){
+    try { computeStats(); } catch(e){ console.error('computeStats failed', e); }
+    try { renderAccountsList(); } catch(e){ console.error('renderAccountsList failed', e); $('#listRoot').innerHTML = `<div class="empty-state"><div class="big">Couldn't display accounts</div><div>Check the browser console for the error, or tell Claude what it says.</div></div>`; }
+    try { renderInvoiceList(); } catch(e){ console.error('renderInvoiceList failed', e); $('#invListRoot').innerHTML = `<div class="empty-state"><div class="big">Couldn't display the ledger</div><div>Check the browser console for the error, or tell Claude what it says.</div></div>`; }
+  }
+
+  function renderAccountsList(){
+    const root = $('#listRoot');
+    const filtered = accounts.filter(a => matchesFilter(a) && matchesSearch(a));
+
+    if (accounts.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">No accounts yet</div><div>Add your first shared account to start tracking slots.</div></div>`;
+      return;
+    }
+    if (filtered.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">Nothing matches</div><div>Try a different search term or filter.</div></div>`;
+      return;
+    }
+    root.innerHTML = `<div class="acc-list">${filtered.map(renderAccountCard).join('')}</div>`;
+
+    $$('.acc-row', root).forEach(row => {
+      row.addEventListener('click', () => {
+        expandedId = expandedId === row.dataset.id ? null : row.dataset.id;
+        render();
+      });
+    });
+    $$('.slot-status-toggle', root).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const { id, type } = btn.dataset;
+        const acc = accounts.find(a => a.id === id);
+        const slot = acc.slots.find(s => s.type === type);
+        slot.status = slot.status === 'sold' ? 'available' : 'sold';
+        if (slot.status === 'available'){ slot.customer=''; slot.whatsapp=''; slot.trxId=''; }
+        saveAccounts(); render();
+      });
+    });
+    $$('.slot-field', root).forEach(inp => {
+      inp.addEventListener('click', e => e.stopPropagation());
+      inp.addEventListener('input', () => {
+        const { id, type, field } = inp.dataset;
+        const acc = accounts.find(a => a.id === id);
+        acc.slots.find(s => s.type === type)[field] = inp.value;
+        saveAccounts();
+        if (field !== 'price') computeStats();
+      });
+    });
+    $$('.copy-btn', root).forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard.writeText(btn.dataset.val).then(()=> showToast('Copied')); });
+    });
+    $$('.edit-acc-btn', root).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditAccount(btn.dataset.id);
+      });
+    });
+    $$('.delete-acc-btn', root).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm('Delete this account and all its slot data? This cannot be undone.')){
+          accounts = accounts.filter(a => a.id !== btn.dataset.id);
+          saveAccounts(); render();
+        }
+      });
+    });
+    $$('.exchange-slot-btn', root).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startExchangeFromSlot(btn.dataset.id, btn.dataset.type);
+      });
+    });
+    $$('.toggle-pw', root).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const box = document.getElementById('pw-' + btn.dataset.id);
+        const isMasked = box.dataset.masked === '1';
+        box.textContent = isMasked ? btn.dataset.val : '•'.repeat(Math.min(btn.dataset.val.length, 10));
+        box.dataset.masked = isMasked ? '0' : '1';
+      });
+    });
+  }
+
+  function renderAccountCard(acc){
+    const expanded = expandedId === acc.id;
+    const soldCount = acc.slots.filter(s => s.status === 'sold').length;
+    return `
+    <div class="acc-card ${expanded ? 'expanded' : ''}">
+      <div class="acc-row" data-id="${acc.id}">
+        <span class="chevron">▶</span>
+        ${acc.image ? `<img src="${escapeHtml(acc.image)}" alt="" style="width:34px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0;" onerror="this.style.display='none'">` : ''}
+        <div class="acc-main">
+          <div class="acc-email">${escapeHtml(acc.email)}</div>
+          <div class="acc-meta">
+            ${acc.platformMode === 'ps5_only' ? '<span class="tag ps5">PS5 only</span>' : ''}
+            ${acc.platformMode === 'ps4_only' ? '<span class="tag ps4">PS4 only</span>' : ''}
+            ${acc.username ? `<span class="tag">${escapeHtml(acc.username)}</span>` : ''}
+            <span>${escapeHtml(acc.games || 'no games listed')}</span>
+          </div>
+        </div>
+        <div class="slot-dots">${acc.slots.map(s => `<span class="slot-dot ${s.status==='sold'?'sold':''}"></span>`).join('')}</div>
+        <div class="slot-count">${soldCount}/3 sold</div>
+      </div>
+      <div class="acc-detail">
+        <div class="cred-grid">
+          <div class="cred-box"><span class="cred-label">Login</span><span class="cred-val">${escapeHtml(acc.email)}<button class="btn btn-sm btn-ghost copy-btn" data-val="${escapeHtml(acc.email)}">copy</button></span></div>
+          <div class="cred-box"><span class="cred-label">Password</span><span class="cred-val"><span id="pw-${acc.id}" data-masked="1">${'•'.repeat(Math.min((acc.password||'').length,10))}</span><span style="display:flex; gap:4px;"><button class="btn btn-sm btn-ghost toggle-pw" data-id="${acc.id}" data-val="${escapeHtml(acc.password)}">show</button><button class="btn btn-sm btn-ghost copy-btn" data-val="${escapeHtml(acc.password)}">copy</button></span></span></div>
+          ${acc.username ? `<div class="cred-box"><span class="cred-label">Username / PSN</span><span class="cred-val">${escapeHtml(acc.username)}</span></div>` : ''}
+          ${acc.purchaseOrderId ? `<div class="cred-box"><span class="cred-label">Purchase order ID</span><span class="cred-val">${escapeHtml(acc.purchaseOrderId)}</span></div>` : ''}
+          ${acc.dob ? `<div class="cred-box"><span class="cred-label">Date of birth</span><span class="cred-val">${escapeHtml(acc.dob)}</span></div>` : ''}
+        </div>
+        <div class="slots-grid">${acc.slots.map(s => renderSlot(acc, s)).join('')}</div>
+        ${acc.notes ? `<div class="notes-box">Note: ${escapeHtml(acc.notes)}</div>` : ''}
+        <div class="acc-footer-actions">
+          <button class="btn btn-sm btn-ghost edit-acc-btn" data-id="${acc.id}">Edit account</button>
+          <button class="btn btn-sm btn-danger delete-acc-btn" data-id="${acc.id}">Delete account</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderSlot(acc, s){
+    const def = slotDef(s.type);
+    const isSold = s.status === 'sold';
+    return `
+    <div class="slot-card ${isSold ? 'is-sold' : 'is-avail'}">
+      <div class="slot-head">
+        <span class="slot-name"><span class="tag ${def.tagClass}">${def.label}</span></span>
+        <button class="status-pill ${isSold?'sold':'avail'} slot-status-toggle" data-id="${acc.id}" data-type="${s.type}">${isSold ? 'Sold' : 'Available'}</button>
+      </div>
+      ${isSold ? `
+        <input class="slot-field" data-id="${acc.id}" data-type="${s.type}" data-field="customer" value="${escapeHtml(s.customer)}" placeholder="Customer name">
+        <div class="two-col">
+          <input class="slot-field" data-id="${acc.id}" data-type="${s.type}" data-field="whatsapp" value="${escapeHtml(s.whatsapp)}" placeholder="WhatsApp number">
+          <input class="slot-field" data-id="${acc.id}" data-type="${s.type}" data-field="price" value="${escapeHtml(s.price)}" placeholder="Price sold at">
+        </div>
+        ${s.trxId ? `<div class="slot-price-label">TRX: ${escapeHtml(s.trxId)}</div>` : ''}
+        <button class="btn btn-sm btn-ghost exchange-slot-btn" data-id="${acc.id}" data-type="${s.type}" style="margin-top:8px; width:100%;">🔄 Exchange this slot</button>
+      ` : `
+        <input class="slot-field" data-id="${acc.id}" data-type="${s.type}" data-field="price" value="${escapeHtml(s.price)}" placeholder="Asking price">
+        <div class="slot-price-label">Open for sale${slotConsoleLabel(acc, s.type)}</div>
+      `}
+    </div>`;
+  }
+
+  function slotConsoleLabel(acc, type){
+    const def = slotDef(type);
+    if (def.fixedConsole) return ' · ' + def.fixedConsole;
+    const secConsole = secondaryConsoleForMode(acc.platformMode);
+    return secConsole ? ' · ' + secConsole : ' · PS4 or PS5';
+  }
+
+  /* ---------------- ADD / EDIT ACCOUNT ---------------- */
+  let editingAccountId = null;
+
+  function updatePriceFieldVisibility(){
+    const mode = $('#f_platform_mode').value;
+    $('#priceFieldPs5').style.display = (mode === 'ps4_only') ? 'none' : '';
+    $('#priceFieldPs4').style.display = (mode === 'ps5_only') ? 'none' : '';
+  }
+  $('#f_platform_mode').addEventListener('change', updatePriceFieldVisibility);
+
+  $('#toggleAddBtn').addEventListener('click', () => {
+    editingAccountId = null;
+    $('#addPanelTitle').textContent = 'Add account';
+    $('#saveAddBtn').textContent = 'Save account';
+    $('#initialPriceGrid').style.display = 'grid';
+    clearAddForm();
+    updatePriceFieldVisibility();
+    $('#addPanel').classList.add('open');
+    $('#f_email').focus();
+  });
+  $('#cancelAddBtn').addEventListener('click', () => {
+    $('#addPanel').classList.remove('open');
+    editingAccountId = null;
+    clearAddForm();
+  });
+  function clearAddForm(){
+    ['f_email','f_password','f_username','f_poid','f_dob','f_games','f_notes','f_image','f_price_ps5','f_price_ps4','f_price_sec'].forEach(id => $('#'+id).value = '');
+    $('#f_platform_mode').value = 'both';
+  }
+
+  function openEditAccount(accId){
+    const acc = accounts.find(a => a.id === accId);
+    if (!acc) return;
+    editingAccountId = accId;
+    $('#addPanelTitle').textContent = 'Edit account';
+    $('#saveAddBtn').textContent = 'Save changes';
+    $('#initialPriceGrid').style.display = 'none';
+    $('#f_email').value = acc.email;
+    $('#f_password').value = acc.password;
+    $('#f_username').value = acc.username || '';
+    $('#f_poid').value = acc.purchaseOrderId || '';
+    $('#f_dob').value = acc.dob || '';
+    $('#f_games').value = acc.games || '';
+    $('#f_notes').value = acc.notes || '';
+    $('#f_image').value = acc.image || '';
+    $('#f_platform_mode').value = acc.platformMode || 'both';
+    $('#addPanel').classList.add('open');
+    $('#addPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#f_email').focus();
+  }
+
+  $('#saveAddBtn').addEventListener('click', () => {
+    const email = $('#f_email').value.trim();
+    const password = $('#f_password').value.trim();
+    if (!email || !password){ showToast('Email and password are required'); return; }
+    const newMode = $('#f_platform_mode').value;
+
+    if (editingAccountId){
+      const acc = accounts.find(a => a.id === editingAccountId);
+      if (!acc){ showToast('Account no longer exists'); return; }
+
+      if ((acc.platformMode || 'both') !== newMode){
+        const requiredTypes = slotTypesForMode(newMode);
+        const currentTypes = acc.slots.map(s => s.type);
+        const toRemove = acc.slots.filter(s => !requiredTypes.includes(s.type));
+        const blockedBySold = toRemove.find(s => s.status === 'sold');
+        if (blockedBySold){
+          showToast(`Can't change platform — ${slotDef(blockedBySold.type).label} is currently sold. Free or exchange it first.`);
+          return;
+        }
+        acc.slots = acc.slots.filter(s => requiredTypes.includes(s.type));
+        requiredTypes.forEach(type => {
+          if (!currentTypes.includes(type)){
+            const d = slotDef(type);
+            acc.slots.push({
+              type, status: 'available', price: '',
+              customer: '', whatsapp: '', trxId: '',
+              consoleUsed: type === 'secondary' ? secondaryConsoleForMode(newMode) : (d.fixedConsole || '')
+            });
+          }
+        });
+        if (requiredTypes.includes('secondary')){
+          const secSlot = acc.slots.find(s => s.type === 'secondary');
+          if (secSlot && secSlot.status === 'available') secSlot.consoleUsed = secondaryConsoleForMode(newMode);
+        }
+        acc.platformMode = newMode;
+      }
+
+      acc.email = email;
+      acc.password = password;
+      acc.username = $('#f_username').value.trim();
+      acc.purchaseOrderId = $('#f_poid').value.trim();
+      acc.dob = $('#f_dob').value;
+      acc.games = $('#f_games').value.trim();
+      acc.notes = $('#f_notes').value.trim();
+      acc.image = $('#f_image').value.trim();
+      saveAccounts();
+      editingAccountId = null;
+      clearAddForm();
+      $('#addPanel').classList.remove('open');
+      showToast('Account updated');
+      render();
+      return;
+    }
+    const acc = {
+      id: uid(), email, password,
+      username: $('#f_username').value.trim(),
+      purchaseOrderId: $('#f_poid').value.trim(),
+      dob: $('#f_dob').value,
+      games: $('#f_games').value.trim(),
+      notes: $('#f_notes').value.trim(),
+      image: $('#f_image').value.trim(),
+      platformMode: newMode,
+      slots: newSlots({
+        ps5_primary: $('#f_price_ps5').value.trim(),
+        ps4_primary: $('#f_price_ps4').value.trim(),
+        secondary: $('#f_price_sec').value.trim()
+      }, newMode)
+    };
+    accounts.unshift(acc);
+    saveAccounts();
+    clearAddForm();
+    $('#addPanel').classList.remove('open');
+    showToast('Account added');
+    render();
+  });
+
+  $('#searchInput').addEventListener('input', (e) => { searchTerm = e.target.value; renderAccountsList(); });
+  $$('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $$('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      filterMode = chip.dataset.filter;
+      renderAccountsList();
+    });
+  });
+
+  /* ---------------- INVOICE / LEDGER ---------------- */
+  $('#toggleInvBtn').addEventListener('click', () => {
+    openInvoicePanel();
+    $('#inv_acc_search').focus();
+  });
+  $('#cancelInvBtn').addEventListener('click', resetInvoiceForm);
+
+  function resetInvoiceForm(){
+    $('#invPanel').classList.remove('open');
+    invSelectedAccountId = null;
+    invSelectedSlotType = null;
+    exchangeSource = null;
+    $('#exchangeBanner').style.display = 'none';
+    $('#exchangeBanner').textContent = '';
+    $('#saveInvBtn').textContent = 'Save invoice & mark slot sold';
+    $('#inv_acc_search').value = '';
+    $('#accSuggest').style.display = 'none';
+    $('#selectedAccWrap').innerHTML = '';
+    $('#slotPickWrap').innerHTML = '';
+    $('#invFieldsWrap').style.display = 'none';
+    $('#trxRow').style.display = 'none';
+    ['inv_game','inv_price','inv_customer','inv_whatsapp'].forEach(id => $('#'+id).value = '');
+  }
+
+  function openInvoicePanel(){
+    $('#invPanel').classList.add('open');
+    $('#inv_date').value = todayStr();
+    $('#inv_trx').value = genTrx();
+  }
+
+  function startExchangeFromInvoice(invId){
+    const inv = invoices.find(i => i.id === invId);
+    if (!inv) return;
+    activeTab = 'ledger';
+    $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'ledger'));
+    $('#view-accounts').classList.remove('active');
+    $('#view-ledger').classList.add('active');
+    resetInvoiceForm();
+    openInvoicePanel();
+    exchangeSource = { type: 'invoice', invoiceId: inv.id };
+    $('#inv_whatsapp').value = inv.whatsapp || '';
+    $('#inv_customer').value = inv.customer || '';
+    $('#exchangeBanner').textContent = `Exchanging out of "${inv.game || inv.slotLabel}" on ${inv.accountEmail} (TRX ${inv.trxId}). Pick the new game/account/slot below — the old slot reopens automatically once you save.`;
+    $('#exchangeBanner').style.display = 'block';
+    $('#saveInvBtn').textContent = 'Complete exchange';
+    $('#inv_acc_search').focus();
+  }
+
+  function startExchangeFromSlot(accountId, slotType){
+    const acc = accounts.find(a => a.id === accountId);
+    if (!acc) return;
+    const slot = acc.slots.find(s => s.type === slotType);
+    if (!slot) return;
+    if (slot.trxId){
+      const inv = invoices.find(i => i.trxId === slot.trxId && i.status !== 'exchanged');
+      if (inv){ startExchangeFromInvoice(inv.id); return; }
+    }
+    activeTab = 'ledger';
+    $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'ledger'));
+    $('#view-accounts').classList.remove('active');
+    $('#view-ledger').classList.add('active');
+    resetInvoiceForm();
+    openInvoicePanel();
+    exchangeSource = { type: 'slot', accountId, slotType };
+    $('#inv_whatsapp').value = slot.whatsapp || '';
+    $('#inv_customer').value = slot.customer || '';
+    $('#exchangeBanner').textContent = `Exchanging out of ${slotDef(slotType).label} on ${acc.email}. Pick the new game/account/slot below — the old slot reopens automatically once you save.`;
+    $('#exchangeBanner').style.display = 'block';
+    $('#saveInvBtn').textContent = 'Complete exchange';
+    $('#inv_acc_search').focus();
+  }
+
+  $('#inv_acc_search').addEventListener('input', (e) => {
+    const t = e.target.value.trim().toLowerCase();
+    const box = $('#accSuggest');
+    if (!t){ box.style.display = 'none'; box.innerHTML=''; return; }
+    const matches = accounts.filter(a =>
+      a.email.toLowerCase().includes(t) ||
+      (a.username||'').toLowerCase().includes(t) ||
+      (a.games||'').toLowerCase().includes(t)
+    ).slice(0, 12);
+    if (matches.length === 0){ box.innerHTML = `<div class="acc-suggest-item">No accounts found</div>`; box.style.display='block'; return; }
+    box.innerHTML = matches.map(a => `<div class="acc-suggest-item" data-id="${a.id}"><div class="em">${escapeHtml(a.email)}</div><div class="gm">${escapeHtml(a.games||'')}</div></div>`).join('');
+    box.style.display = 'block';
+    $$('.acc-suggest-item', box).forEach(item => {
+      item.addEventListener('click', () => {
+        if (!item.dataset.id) return;
+        selectInvoiceAccount(item.dataset.id);
+        box.style.display = 'none';
+      });
+    });
+  });
+
+  function selectInvoiceAccount(accId){
+    invSelectedAccountId = accId;
+    invSelectedSlotType = null;
+    const acc = accounts.find(a => a.id === accId);
+    $('#inv_acc_search').value = acc.email;
+    $('#selectedAccWrap').innerHTML = `<div class="selected-acc-chip"><span>Selling from <span class="mono">${escapeHtml(acc.email)}</span></span><button class="btn btn-sm btn-ghost" id="changeAccBtn">change</button></div>`;
+    $('#changeAccBtn').addEventListener('click', () => {
+      invSelectedAccountId = null; invSelectedSlotType = null;
+      $('#selectedAccWrap').innerHTML = '';
+      $('#slotPickWrap').innerHTML = '';
+      $('#invFieldsWrap').style.display = 'none';
+      $('#trxRow').style.display = 'none';
+      $('#inv_acc_search').value = '';
+      $('#inv_acc_search').focus();
+    });
+    if (acc.games) $('#inv_game').value = acc.games.split(',')[0].trim();
+
+    $('#slotPickWrap').innerHTML = `<div class="slot-pick-row">${acc.slots.map(s => {
+      const def = slotDef(s.type);
+      const soldOut = s.status === 'sold';
+      return `<button class="slot-pick" data-type="${s.type}" ${soldOut ? 'disabled' : ''}>${def.label}${soldOut ? ' · sold' : ''}</button>`;
+    }).join('')}</div>`;
+    $$('.slot-pick', $('#slotPickWrap')).forEach(btn => {
+      if (btn.disabled) return;
+      btn.addEventListener('click', () => {
+        invSelectedSlotType = btn.dataset.type;
+        $$('.slot-pick', $('#slotPickWrap')).forEach(b => b.classList.toggle('selected', b === btn));
+        const slot = acc.slots.find(s => s.type === invSelectedSlotType);
+        $('#inv_price').value = slot.price || '';
+        $('#invFieldsWrap').style.display = 'grid';
+        $('#trxRow').style.display = 'flex';
+        $('#consoleUsedWrap').style.display = (invSelectedSlotType === 'secondary' && (acc.platformMode || 'both') === 'both') ? 'block' : 'none';
+      });
+    });
+  }
+
+  $('#regenTrxBtn').addEventListener('click', () => { $('#inv_trx').value = genTrx(); });
+
+  $('#saveInvBtn').addEventListener('click', () => {
+    if (!invSelectedAccountId){ showToast('Pick an account first'); return; }
+    if (!invSelectedSlotType){ showToast('Pick which slot you sold'); return; }
+    const whatsapp = $('#inv_whatsapp').value.trim();
+    if (!whatsapp){ showToast('Customer WhatsApp number is required'); return; }
+    const trxId = $('#inv_trx').value.trim() || genTrx();
+    if (invoices.some(i => i.trxId === trxId)){ showToast('That TRX ID is already used'); return; }
+
+    const acc = accounts.find(a => a.id === invSelectedAccountId);
+    const slot = acc.slots.find(s => s.type === invSelectedSlotType);
+    const def = slotDef(invSelectedSlotType);
+    const price = $('#inv_price').value.trim();
+    const game = $('#inv_game').value.trim();
+    const customer = $('#inv_customer').value.trim();
+    const secondaryFlexible = invSelectedSlotType === 'secondary' && (acc.platformMode || 'both') === 'both';
+    const consoleUsed = secondaryFlexible ? $('#inv_console').value : (slot.consoleUsed || def.fixedConsole || '');
+
+    slot.status = 'sold';
+    slot.price = price;
+    slot.customer = customer || whatsapp;
+    slot.whatsapp = whatsapp;
+    slot.trxId = trxId;
+    slot.consoleUsed = consoleUsed;
+    saveAccounts();
+
+    const newInvoice = {
+      id: uid(), trxId, date: $('#inv_date').value || todayStr(),
+      accountId: acc.id, accountEmail: acc.email,
+      slotType: invSelectedSlotType, slotLabel: def.label, consoleUsed,
+      game, price, customer, whatsapp, status: 'active'
+    };
+
+    if (exchangeSource){
+      if (exchangeSource.type === 'invoice'){
+        const oldInv = invoices.find(i => i.id === exchangeSource.invoiceId);
+        if (oldInv){
+          oldInv.status = 'exchanged';
+          oldInv.exchangedTo = trxId;
+          const oldAcc = accounts.find(a => a.id === oldInv.accountId);
+          if (oldAcc){
+            const oldSlot = oldAcc.slots.find(s => s.type === oldInv.slotType);
+            if (oldSlot && oldSlot.trxId === oldInv.trxId){
+              oldSlot.status = 'available'; oldSlot.customer=''; oldSlot.whatsapp=''; oldSlot.trxId='';
+              saveAccounts();
+            }
+          }
+          newInvoice.exchangedFrom = oldInv.trxId;
+        }
+      } else if (exchangeSource.type === 'slot'){
+        const oldAcc = accounts.find(a => a.id === exchangeSource.accountId);
+        if (oldAcc){
+          const oldSlot = oldAcc.slots.find(s => s.type === exchangeSource.slotType);
+          if (oldSlot){
+            oldSlot.status = 'available'; oldSlot.customer=''; oldSlot.whatsapp=''; oldSlot.trxId='';
+            saveAccounts();
+          }
+        }
+        newInvoice.exchangedFrom = 'manual-slot';
+      }
+    }
+
+    invoices.unshift(newInvoice);
+    saveInvoices();
+
+    showToast(exchangeSource ? 'Exchange complete' : 'Invoice saved — slot marked sold');
+    resetInvoiceForm();
+    render();
+  });
+
+  $('#invSearchInput').addEventListener('input', (e) => { invSearchTerm = e.target.value; renderInvoiceList(); });
+
+  function renderInvoiceList(){
+    const root = $('#invListRoot');
+    const t = invSearchTerm.toLowerCase();
+    const filtered = invoices.filter(inv => !t ||
+      (inv.trxId||'').toLowerCase().includes(t) ||
+      (inv.whatsapp||'').toLowerCase().includes(t) ||
+      (inv.game||'').toLowerCase().includes(t) ||
+      (inv.accountEmail||'').toLowerCase().includes(t) ||
+      (inv.customer||'').toLowerCase().includes(t)
+    );
+    if (invoices.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">No invoices yet</div><div>Sales you record here automatically mark the matching slot as sold.</div></div>`;
+      return;
+    }
+    if (filtered.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">Nothing matches</div><div>Try a different search term.</div></div>`;
+      return;
+    }
+    root.innerHTML = `<div class="inv-table-wrap"><table class="inv-table">
+      <thead><tr><th>Date</th><th>TRX ID</th><th>Game</th><th>Account</th><th>Slot</th><th>Price</th><th>Customer</th><th>WhatsApp</th><th></th></tr></thead>
+      <tbody>${filtered.map(inv => {
+        const isExchanged = inv.status === 'exchanged';
+        return `
+        <tr style="${isExchanged ? 'opacity:.55;' : ''}">
+          <td>${escapeHtml(inv.date)}</td>
+          <td class="trx">${escapeHtml(inv.trxId)}</td>
+          <td>${isExchanged ? '<s>' + escapeHtml(inv.game || '—') + '</s>' : escapeHtml(inv.game || '—')}
+            ${inv.exchangedFrom ? `<div style="font-size:11px; color:var(--sec);">🔄 from ${escapeHtml(inv.exchangedFrom === 'manual-slot' ? 'manual slot' : inv.exchangedFrom)}</div>` : ''}
+            ${isExchanged ? `<div style="font-size:11px; color:var(--sec);">→ exchanged to ${escapeHtml(inv.exchangedTo)}</div>` : ''}
+          </td>
+          <td class="em">${escapeHtml(inv.accountEmail)}</td>
+          <td>${escapeHtml(inv.slotLabel)}${inv.consoleUsed ? ' (' + escapeHtml(inv.consoleUsed) + ')' : ''}</td>
+          <td>${escapeHtml(inv.price || '—')}</td>
+          <td>${escapeHtml(inv.customer || '—')}</td>
+          <td class="mono">${escapeHtml(inv.whatsapp)}</td>
+          <td style="white-space:nowrap;">${isExchanged ? '' : `<button class="btn btn-sm btn-ghost exchange-inv-btn" data-id="${inv.id}">🔄 Exchange</button> <button class="btn btn-sm btn-danger void-inv-btn" data-id="${inv.id}">Void</button>`}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+
+    $$('.exchange-inv-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => startExchangeFromInvoice(btn.dataset.id));
+    });
+
+    $$('.void-inv-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Void this invoice and reopen the slot for resale?')) return;
+        const inv = invoices.find(i => i.id === btn.dataset.id);
+        const acc = accounts.find(a => a.id === inv.accountId);
+        if (acc){
+          const slot = acc.slots.find(s => s.type === inv.slotType);
+          if (slot && slot.trxId === inv.trxId){
+            slot.status = 'available'; slot.customer=''; slot.whatsapp=''; slot.trxId='';
+            saveAccounts();
+          }
+        }
+        invoices = invoices.filter(i => i.id !== inv.id);
+        saveInvoices();
+        showToast('Invoice voided — slot reopened');
+        render();
+      });
+    });
+  }
+
+  /* ---------------- EXPORT / IMPORT ---------------- */
+  $('#exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ accounts, invoices }, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'game-vault-backup.json';
+    a.click();
+  });
+  $('#importBtn').addEventListener('click', () => $('#importFile').click());
+  $('#importFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (Array.isArray(data)){
+          accounts = data.map(migrateAccount);
+        } else if (data && Array.isArray(data.accounts)){
+          accounts = data.accounts.map(migrateAccount);
+          invoices = Array.isArray(data.invoices) ? data.invoices : [];
+        } else { throw new Error('bad format'); }
+        saveAccounts(); saveInvoices(); render();
+        showToast('Import complete');
+      } catch(err){ showToast('Import failed — invalid file'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  /* ---------------- RESELLERS ---------------- */
+  function findAvailableSlotsForOrder(order){
+    const matches = [];
+    accounts.forEach(acc => {
+      const games = (acc.games || '').split(',').map(g => g.trim().toLowerCase());
+      if (!games.includes((order.game || '').trim().toLowerCase())) return;
+      const slot = acc.slots.find(s => s.type === order.slotType && s.status === 'available');
+      if (slot) matches.push({ account: acc, slot });
+    });
+    return matches;
+  }
+
+  function renderResellersView(){
+    $('#statResellers').textContent = resellers.length;
+    const pending = orders.filter(o => o.status === 'pending');
+    $('#statPendingOrders').textContent = pending.length;
+    const pendingBal = balanceRequests.filter(r => r.status === 'pending');
+    $('#statPendingBalReqs').textContent = pendingBal.length;
+    renderBalanceRequests(pendingBal);
+    renderPendingOrders(pending);
+    renderResellerList();
+  }
+
+  function renderBalanceRequests(pending){
+    const root = $('#balanceRequestsRoot');
+    if (pending.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">No balance requests</div><div>When a reseller submits a payment screenshot, it shows up here.</div></div>`;
+      return;
+    }
+    root.innerHTML = pending.map(r => `
+      <div class="order-fulfill-card">
+        <div class="order-fulfill-top">
+          <div>
+            <div class="order-fulfill-game">${escapeHtml(r.resellerName)} — ${escapeHtml(String(r.amount))}</div>
+            <div class="order-fulfill-meta">${escapeHtml(r.date)} · ${escapeHtml(r.resellerWhatsapp)}</div>
+            ${r.screenshotUrl ? `<a href="${escapeHtml(r.screenshotUrl)}" target="_blank"><img src="${escapeHtml(r.screenshotUrl)}" style="max-width:180px; border-radius:8px; margin-top:8px; display:block; border:1px solid var(--border);"></a>` : ''}
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-primary approve-bal-btn" data-id="${r.id}">Approve</button>
+            <button class="btn btn-sm btn-danger reject-bal-btn" data-id="${r.id}">Reject</button>
+          </div>
+        </div>
+      </div>`).join('');
+
+    $$('.approve-bal-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const req = balanceRequests.find(x => x.id === btn.dataset.id);
+        const r = resellers.find(x => x.id === req.resellerId);
+        if (!r){ showToast('Reseller not found'); return; }
+        r.balance = Math.round((r.balance + req.amount) * 100) / 100;
+        req.status = 'approved';
+        saveResellers();
+        saveBalanceRequests();
+        showToast('Balance approved and added');
+        renderResellersView();
+      });
+    });
+    $$('.reject-bal-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Reject this balance request?')) return;
+        const req = balanceRequests.find(x => x.id === btn.dataset.id);
+        req.status = 'rejected';
+        saveBalanceRequests();
+        showToast('Request rejected');
+        renderResellersView();
+      });
+    });
+  }
+
+  function renderResellerList(){
+    const root = $('#resellerListRoot');
+    if (resellers.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">No resellers yet</div><div>Once someone signs up on your store page, they'll show up here.</div></div>`;
+      return;
+    }
+    root.innerHTML = resellers.map(r => `
+      <div class="reseller-card">
+        <div>
+          <div class="reseller-name">${escapeHtml(r.name)}</div>
+          <div class="reseller-meta">${escapeHtml(r.whatsapp)}</div>
+        </div>
+        <div class="reseller-balance">Balance: ${r.balance}</div>
+        <div class="topup-row">
+          <input type="text" placeholder="amount" id="topup-${r.id}">
+          <button class="btn btn-sm btn-primary topup-btn" data-id="${r.id}">Add balance</button>
+        </div>
+      </div>`).join('');
+    $$('.topup-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const amt = parseFloat($('#topup-' + btn.dataset.id).value);
+        if (isNaN(amt) || amt <= 0){ showToast('Enter a valid amount'); return; }
+        const r = resellers.find(x => x.id === btn.dataset.id);
+        r.balance = Math.round((r.balance + amt) * 100) / 100;
+        saveResellers();
+        showToast('Balance updated');
+        renderResellersView();
+      });
+    });
+  }
+
+  function renderPendingOrders(pending){
+    const root = $('#pendingOrdersRoot');
+    if (pending.length === 0){
+      root.innerHTML = `<div class="empty-state"><div class="big">No pending orders</div><div>Orders resellers place will show up here for you to confirm.</div></div>`;
+      return;
+    }
+    root.innerHTML = pending.map(o => `
+      <div class="order-fulfill-card">
+        <div class="order-fulfill-top">
+          <div>
+            <div class="order-fulfill-game">${escapeHtml(o.game)} — ${escapeHtml(o.slotLabel)}</div>
+            <div class="order-fulfill-meta">${escapeHtml(o.date)} · ${escapeHtml(o.resellerName)} (${escapeHtml(o.resellerWhatsapp)}) · Paid ${escapeHtml(String(o.price))}</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-primary fulfill-open-btn" data-id="${o.id}">Fulfill</button>
+            <button class="btn btn-sm btn-danger cancel-order-btn" data-id="${o.id}">Cancel &amp; refund</button>
+          </div>
+        </div>
+        <div class="fulfill-picker" id="fulfillPicker-${o.id}" style="display:none;"></div>
+      </div>`).join('');
+
+    $$('.fulfill-open-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => openFulfillPicker(btn.dataset.id));
+    });
+    $$('.cancel-order-btn', root).forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Cancel this order and refund the reseller?')) return;
+        const order = orders.find(o => o.id === btn.dataset.id);
+        const r = resellers.find(x => x.id === order.resellerId);
+        if (r){ r.balance = Math.round((r.balance + order.price) * 100) / 100; saveResellers(); }
+        order.status = 'cancelled';
+        saveOrders();
+        showToast('Order cancelled and refunded');
+        renderResellersView();
+      });
+    });
+  }
+
+  function openFulfillPicker(orderId){
+    const order = orders.find(o => o.id === orderId);
+    const picker = $('#fulfillPicker-' + orderId);
+    const matches = findAvailableSlotsForOrder(order);
+    if (matches.length === 0){
+      picker.innerHTML = `<div style="color:var(--text-faint); font-size:12.5px;">No available account currently has this game/slot open. Add stock or cancel this order.</div>`;
+      picker.style.display = 'block';
+      return;
+    }
+    picker.innerHTML = matches.map((m, i) => `
+      <div class="fulfill-option">
+        <span class="mono">${escapeHtml(m.account.email)}</span>
+        <button class="btn btn-sm btn-primary confirm-fulfill-btn" data-order="${orderId}" data-acc="${m.account.id}">Use this account</button>
+      </div>`).join('');
+    picker.style.display = 'block';
+    $$('.confirm-fulfill-btn', picker).forEach(btn => {
+      btn.addEventListener('click', () => confirmFulfill(btn.dataset.order, btn.dataset.acc));
+    });
+  }
+
+  function confirmFulfill(orderId, accountId){
+    const order = orders.find(o => o.id === orderId);
+    const acc = accounts.find(a => a.id === accountId);
+    if (!order || !acc) return;
+    const slot = acc.slots.find(s => s.type === order.slotType && s.status === 'available');
+    if (!slot){ showToast('That slot is no longer available'); openFulfillPicker(orderId); return; }
+
+    const trxId = genTrx();
+    slot.status = 'sold';
+    slot.price = order.price;
+    slot.customer = order.resellerName;
+    slot.whatsapp = order.resellerWhatsapp;
+    slot.trxId = trxId;
+    slot.consoleUsed = slotDef(order.slotType).fixedConsole || slot.consoleUsed;
+    saveAccounts();
+
+    invoices.unshift({
+      id: uid(), trxId, date: todayStr(),
+      accountId: acc.id, accountEmail: acc.email,
+      slotType: order.slotType, slotLabel: order.slotLabel, consoleUsed: slot.consoleUsed,
+      game: order.game, price: order.price, customer: order.resellerName, whatsapp: order.resellerWhatsapp,
+      status: 'active'
+    });
+    saveInvoices();
+
+    order.status = 'fulfilled';
+    order.fulfilledEmail = acc.email;
+    order.fulfilledPassword = acc.password;
+    order.fulfilledDate = todayStr();
+    saveOrders();
+
+    showToast('Order fulfilled — reseller can now see their login');
+    renderResellersView();
+    render();
+  }
+
+  /* ---------------- OWNER LOCK ---------------- */
+  // Change this before sharing the file with your brother — this is the shared owner password.
+  const OWNER_PASSWORD = '5240776645Ar@';
+  const LS_UNLOCK_KEY = 'gv_unlocked';
+
+  function tryUnlock(pw){
+    if (pw === OWNER_PASSWORD){
+      try { localStorage.setItem(LS_UNLOCK_KEY, '1'); } catch(e){}
+      $('#lockScreen').style.display = 'none';
+      $('#vaultContent').classList.remove('lock-hidden');
+      loadData();
+      return true;
+    }
+    $('#lockError').textContent = 'Wrong password';
+    return false;
+  }
+
+  $('#lockSubmitBtn').addEventListener('click', () => tryUnlock($('#lockPassword').value));
+  $('#lockPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock($('#lockPassword').value); });
+  $('#lockNowBtn').addEventListener('click', () => {
+    try { localStorage.removeItem(LS_UNLOCK_KEY); } catch(e){}
+    $('#lockPassword').value = '';
+    $('#lockError').textContent = '';
+    $('#lockScreen').style.display = 'flex';
+    $('#vaultContent').classList.add('lock-hidden');
+  });
+
+  let alreadyUnlocked = false;
+  try { alreadyUnlocked = localStorage.getItem(LS_UNLOCK_KEY) === '1'; } catch(e){}
+  if (alreadyUnlocked){
+    $('#lockScreen').style.display = 'none';
+    $('#vaultContent').classList.remove('lock-hidden');
+    loadData();
+  }
+
+  /* ---------------- SETTINGS ---------------- */
+  $('#settingsBtn').addEventListener('click', () => {
+    $('#f_script_url').value = getScriptUrl();
+    updateSyncStatusLine();
+    $('#settingsPanel').classList.add('open');
+  });
+  $('#closeSettingsBtn').addEventListener('click', () => $('#settingsPanel').classList.remove('open'));
+  $('#saveScriptUrlBtn').addEventListener('click', async () => {
+    const url = $('#f_script_url').value.trim();
+    if (!url){ showToast('Paste your Apps Script URL first'); return; }
+    setScriptUrl(url);
+    showToast('Connecting...');
+    await loadData();
+    showToast(hasSheetSync() ? 'Connected to Google Sheet' : 'Could not connect');
+  });
+})();
+</script>
